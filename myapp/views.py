@@ -1,10 +1,11 @@
-from django.shortcuts import get_object_or_404
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Movie, Watchlist
 from .serializers import MovieSerializer
+from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
+from .models import Movie
 
 
 @api_view(['GET'])
@@ -16,19 +17,19 @@ def get_all_movies(request):
 
 
 @api_view(['POST'])
-# @permission_classes([IsAuthenticated])
-def add_movie_to_watchlist(request):
+def add_to_watchlist(request):
     if request.method == 'POST':
-        movies = Movie.objects.all()
+        if not request.user.is_authenticated:
+            return Response({"message": "User is not authenticated"}, status=status.HTTP_401_UNAUTHORIZED)
         movie_id = request.data.get('movie_id')
-        print(movie_id)
-        try:
-            movie = get_object_or_404(movies, id=movie_id)
-            print(movie.name)
-        except movie.DoesNotExist:
-            return Response({"message": "Movie does not exist"}, status=status.HTTP_404_NOT_FOUND)
-        watchlist, created = Watchlist.objects.get_or_create(user=request.user.id)
-        if movie in watchlist.movies:
-            return Response({"message": "Movie already exists in watchlist"}, status=status.HTTP_400_BAD_REQUEST)
-        watchlist.movies.add(movie)
-        return Response({"message": f"Movie '{movie.name}' added to watchlist"}, status=status.HTTP_201_CREATED)
+        user = request.user
+        if user.watchlist:
+            watchlist = user.watchlist
+        else:
+            watchlist = Watchlist.objects.create()
+            user.watchlist = watchlist
+            user.save()
+        movie = Movie.objects.get(id=movie_id)
+        watchlist.movies.append(movie.id)
+        watchlist.save()
+        return redirect('watchlist')

@@ -1,3 +1,4 @@
+from django.contrib.postgres.fields import ArrayField
 from django.db import models
 
 
@@ -10,5 +11,4 @@ class Movie(models.Model):
 
 
 class Watchlist(models.Model):
-    movies = models.ForeignKey(Movie, on_delete=models.CASCADE,  null=True, blank=True)
-
+    movies = ArrayField(models.IntegerField(), blank=True, null=True)
