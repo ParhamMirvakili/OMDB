@@ -9,4 +9,3 @@ class User(AbstractUser):
     watchlist = models.OneToOneField('myapp.Watchlist', on_delete=models.CASCADE, null=True, blank=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
-

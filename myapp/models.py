@@ -10,5 +10,5 @@ class Movie(models.Model):
 
 
 class Watchlist(models.Model):
-    movies = models.ForeignKey(Movie, on_delete=models.CASCADE, null=True, blank=True)
+    movies = models.ForeignKey(Movie, on_delete=models.CASCADE,  null=True, blank=True)
 
